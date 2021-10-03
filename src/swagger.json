@@ -1,0 +1,254 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Atlas",
+    "description": "Essa é uma documentação sobre a Atlas API.",
+    "version": "1.0.0",
+    "contact": {
+      "email": "adriano.olr@gmail.com"
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id único do usuário"
+          },
+          "name": {
+            "type": "string",
+            "description":"Nome do usuário"
+          },
+          "admin": {
+            "type": "boolean",
+            "description": "Usuário tem acesso administrativo"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email do usuário"
+          },
+          "created_at": {
+            "type": "string",
+            "descriotion": "Data de criação do usuário"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Data da última alteração do usuário"
+          }
+        },
+        "example": {
+          "id": "f102f527-9abf-4ae5-a02b-5c271025ae27",
+          "name": "Fulano de Tal",
+          "admin": false,
+          "email": "fulano@exemplo.com",
+          "created_at": "2021-10-03T20:41:10.357Z",
+          "updated_at": "2021-10-03T20:41:10.357Z"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/users": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Criar um usuário",
+        "description": "Cria um novo usuário",
+        "requestBody": {
+          "required": true,
+          "description": "Campos obrigatórios para a criação de um usuário",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email do usuário"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description":"Nome do usuário"
+                  }
+                },
+                "required": ["email", "name"],
+                "example": {
+                  "email": "fulano@exemplo.com",
+                  "name": "Fulano de Tal"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserModel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Usuário já existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User already exists"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["User"],
+        "summary": "Listar usuários",
+        "description": "Lista todos os usuários",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "user_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id do usuário logado"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserModel"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Usuário não existe ou não tem permissão",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User is not an admin"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Detalhar um usuário específico",
+        "description": "Retorna os dados do usuário especificado",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "description": "Id único do usuário",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_id}/admin": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Tornar admin",
+        "description": "Dá privilégios de admin a um usuário",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "description": "Id único do usuário",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/UserModel"
+                    },
+                    {
+                      "example": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/UserModel/example"
+                          },
+                          {
+                            "admin": true
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type":  "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
